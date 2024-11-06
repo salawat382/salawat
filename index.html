@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Subtraction Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <h1>حملة صلوات لروح الشهيد علي جعفر شحيمي (موسى)</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>عدد الصلوات المطلوبة: <span id="totalNumber">1,000,000</span></h2>
+
+        <!-- Input and Subtract button -->
+        <div class="input-container">
+            <input type="number" id="subtractNumber" placeholder="عدد الصلوات التي ترغب بالمشاركة بها">
+            <button onclick="subtractNumber()">حفظ</button>
+        </div>
+
+        <br>
+        <h2>عدد الصلوات المتبقية: <span id="remainingNumber">1,000,000</span></h2>
+        <button onclick="resetNumber()">Reset</button>
+    </div>
+
+    <script>
+        // Set initial total number to 1,000,000
+        const initialTotal = 1000000;
+        const resetPassword = "yourPassword123"; // Set your own password here
+
+        // Get the remaining number from localStorage or use the initial total
+        let remainingNumber = parseInt(localStorage.getItem('remainingNumber'), 10);
+        if (isNaN(remainingNumber)) {
+            remainingNumber = initialTotal;
+        }
+
+        // Function to format the number with commas
+        function formatNumberWithCommas(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Function to handle subtraction
+        function subtractNumber() {
+            const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
+            
+            // Check if the input is a valid number and is not negative
+            if (isNaN(subtractValue) || subtractValue <= 0) {
+                alert("Please enter a valid number greater than 0.");
+                return;
+            }
+
+            // Subtract the number but ensure the remaining number doesn't go below 0
+            remainingNumber -= subtractValue;
+
+            // Prevent going below 0
+            if (remainingNumber < 0) {
+                remainingNumber = 0;
+            }
+
+            // Save the updated remaining number to localStorage
+            localStorage.setItem('remainingNumber', remainingNumber);
+
+            // Update the displayed remaining number
+            const formattedRemaining = formatNumberWithCommas(remainingNumber);
+            document.getElementById('remainingNumber').textContent = formattedRemaining;
+        }
+
+        // Function to handle reset
+        function resetNumber() {
+            const userPassword = prompt("Enter the password to reset:");
+            if (userPassword === resetPassword) {
+                remainingNumber = initialTotal;
+                localStorage.removeItem('remainingNumber');
+                const formattedRemaining = formatNumberWithCommas(remainingNumber);
+                document.getElementById('remainingNumber').textContent = formattedRemaining;
+                alert("Remaining number has been reset!");
+            } else {
+                alert("Incorrect password! Reset denied.");
+            }
+        }
+
+        // Update the displayed remaining number initially
+        const formattedRemaining = formatNumberWithCommas(remainingNumber);
+        document.getElementById('remainingNumber').textContent = formattedRemaining;
+    </script>
+</body>
+</html>

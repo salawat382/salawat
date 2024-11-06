@@ -96,3 +96,11 @@ button:hover {
     background-color: #45a049;
 }
 
+body {
+    background-image: url('ali.jpg'); /* Use the URL of your image */
+    background-size: cover; /* Ensure the image covers the whole page */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Make the image stay fixed when scrolling */
+    margin: 0;
+    font-family: Arial, sans-serif; /* Optional: add a font for better readability */
+}
