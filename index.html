@@ -3,108 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حملة صلوات</title>
+    <title>Number Subtraction Tool</title>
     <link rel="stylesheet" href="styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script>
+        var firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+    </script>
 </head>
-<script>
-    var firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    var database = firebase.database();
-</script
-    // Your Firebase configuration
-    const firebaseConfig = {
-        apiKey: "your-api-key",
-        authDomain: "your-project-id.firebaseapp.com",
-        databaseURL: "https://your-project-id.firebaseio.com",
-        projectId: "your-project-id",
-        storageBucket: "your-project-id.appspot.com",
-        messagingSenderId: "your-sender-id",
-        appId: "your-app-id"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database(app);
-</script>
-<script>
-    // Reference to your Firebase database
-    const remainingRef = firebase.database().ref('remainingNumber');
-
-    // Set initial total number to 1,000,000
-    const initialTotal = 1000000;
-    const resetPassword = "yourPassword123"; // Set your own password here
-
-    // Get the remaining number from Firebase or use the initial total
-    remainingRef.once('value').then(snapshot => {
-        let remainingNumber = snapshot.val();
-        if (remainingNumber === null) {
-            remainingNumber = initialTotal;
-            remainingRef.set(remainingNumber); // Set initial number if not set
-        }
-
-        // Function to format the number with commas
-        function formatNumberWithCommas(number) {
-            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        // Function to handle subtraction
-        function subtractNumber() {
-            const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
-
-            // Check if the input is a valid number and is not negative
-            if (isNaN(subtractValue) || subtractValue <= 0) {
-                alert("Please enter a valid number greater than 0.");
-                return;
-            }
-
-            // Subtract the number but ensure the remaining number doesn't go below 0
-            remainingNumber -= subtractValue;
-
-            // Prevent going below 0
-            if (remainingNumber < 0) {
-                remainingNumber = 0;
-            }
-
-            // Save the updated remaining number to Firebase
-            remainingRef.set(remainingNumber);
-
-            // Update the displayed remaining number
-            const formattedRemaining = formatNumberWithCommas(remainingNumber);
-            document.getElementById('remainingNumber').textContent = formattedRemaining;
-        }
-
-        // Function to handle reset
-        function resetNumber() {
-            const userPassword = prompt("Enter the password to reset:");
-            if (userPassword === resetPassword) {
-                remainingNumber = initialTotal;
-                remainingRef.set(remainingNumber);
-                const formattedRemaining = formatNumberWithCommas(remainingNumber);
-                document.getElementById('remainingNumber').textContent = formattedRemaining;
-                alert("Remaining number has been reset!");
-            } else {
-                alert("Incorrect password! Reset denied.");
-            }
-        }
-
-        // Update the displayed remaining number initially
-        const formattedRemaining = formatNumberWithCommas(remainingNumber);
-        document.getElementById('remainingNumber').textContent = formattedRemaining;
-    });
-</script>
-
 <body>
     <!-- Header Section -->
     <header>
@@ -130,62 +47,53 @@
     <script>
         // Set initial total number to 1,000,000
         const initialTotal = 1000000;
-        const resetPassword = "mojtaba"; // Set your own password here
 
-        // Get the remaining number from localStorage or use the initial total
-        let remainingNumber = parseInt(localStorage.getItem('remainingNumber'), 10);
-        if (isNaN(remainingNumber)) {
-            remainingNumber = initialTotal;
-        }
+        // Reference to the remaining number in the database
+        var remainingNumberRef = firebase.database().ref('remainingNumber');
 
         // Function to format the number with commas
         function formatNumberWithCommas(number) {
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
+        // Update the displayed remaining number initially
+        remainingNumberRef.on('value', (snapshot) => {
+            const remainingNumber = snapshot.val() || initialTotal;
+            const formattedRemaining = formatNumberWithCommas(remainingNumber);
+            document.getElementById('remainingNumber').textContent = formattedRemaining;
+        });
+
         // Function to handle subtraction
         function subtractNumber() {
             const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
-            
+
             // Check if the input is a valid number and is not negative
             if (isNaN(subtractValue) || subtractValue <= 0) {
                 alert("Please enter a valid number greater than 0.");
                 return;
             }
 
-            // Subtract the number but ensure the remaining number doesn't go below 0
-            remainingNumber -= subtractValue;
-
-            // Prevent going below 0
-            if (remainingNumber < 0) {
-                remainingNumber = 0;
-            }
-
-            // Save the updated remaining number to localStorage
-            localStorage.setItem('remainingNumber', remainingNumber);
-
-            // Update the displayed remaining number
-            const formattedRemaining = formatNumberWithCommas(remainingNumber);
-            document.getElementById('remainingNumber').textContent = formattedRemaining;
+            // Subtract the number in the database
+            remainingNumberRef.transaction((remainingNumber) => {
+                if (remainingNumber === null) {
+                    return initialTotal - subtractValue;
+                } else {
+                    return Math.max(remainingNumber - subtractValue, 0);
+                }
+            });
         }
 
         // Function to handle reset
         function resetNumber() {
+            const resetPassword = "yourPassword123"; // Set your own password here
             const userPassword = prompt("Enter the password to reset:");
             if (userPassword === resetPassword) {
-                remainingNumber = initialTotal;
-                localStorage.removeItem('remainingNumber');
-                const formattedRemaining = formatNumberWithCommas(remainingNumber);
-                document.getElementById('remainingNumber').textContent = formattedRemaining;
+                remainingNumberRef.set(initialTotal);
                 alert("Remaining number has been reset!");
             } else {
                 alert("Incorrect password! Reset denied.");
             }
         }
-
-        // Update the displayed remaining number initially
-        const formattedRemaining = formatNumberWithCommas(remainingNumber);
-        document.getElementById('remainingNumber').textContent = formattedRemaining;
     </script>
 </body>
 </html>
