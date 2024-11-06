@@ -6,6 +6,92 @@
     <title>حملة صلوات</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+<!-- Add Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js"></script>
+<script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "your-api-key",
+        authDomain: "your-project-id.firebaseapp.com",
+        databaseURL: "https://your-project-id.firebaseio.com",
+        projectId: "your-project-id",
+        storageBucket: "your-project-id.appspot.com",
+        messagingSenderId: "your-sender-id",
+        appId: "your-app-id"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database(app);
+</script>
+<script>
+    // Reference to your Firebase database
+    const remainingRef = firebase.database().ref('remainingNumber');
+
+    // Set initial total number to 1,000,000
+    const initialTotal = 1000000;
+    const resetPassword = "yourPassword123"; // Set your own password here
+
+    // Get the remaining number from Firebase or use the initial total
+    remainingRef.once('value').then(snapshot => {
+        let remainingNumber = snapshot.val();
+        if (remainingNumber === null) {
+            remainingNumber = initialTotal;
+            remainingRef.set(remainingNumber); // Set initial number if not set
+        }
+
+        // Function to format the number with commas
+        function formatNumberWithCommas(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Function to handle subtraction
+        function subtractNumber() {
+            const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
+
+            // Check if the input is a valid number and is not negative
+            if (isNaN(subtractValue) || subtractValue <= 0) {
+                alert("Please enter a valid number greater than 0.");
+                return;
+            }
+
+            // Subtract the number but ensure the remaining number doesn't go below 0
+            remainingNumber -= subtractValue;
+
+            // Prevent going below 0
+            if (remainingNumber < 0) {
+                remainingNumber = 0;
+            }
+
+            // Save the updated remaining number to Firebase
+            remainingRef.set(remainingNumber);
+
+            // Update the displayed remaining number
+            const formattedRemaining = formatNumberWithCommas(remainingNumber);
+            document.getElementById('remainingNumber').textContent = formattedRemaining;
+        }
+
+        // Function to handle reset
+        function resetNumber() {
+            const userPassword = prompt("Enter the password to reset:");
+            if (userPassword === resetPassword) {
+                remainingNumber = initialTotal;
+                remainingRef.set(remainingNumber);
+                const formattedRemaining = formatNumberWithCommas(remainingNumber);
+                document.getElementById('remainingNumber').textContent = formattedRemaining;
+                alert("Remaining number has been reset!");
+            } else {
+                alert("Incorrect password! Reset denied.");
+            }
+        }
+
+        // Update the displayed remaining number initially
+        const formattedRemaining = formatNumberWithCommas(remainingNumber);
+        document.getElementById('remainingNumber').textContent = formattedRemaining;
+    });
+</script>
+
 <body>
     <!-- Header Section -->
     <header>
