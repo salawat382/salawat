@@ -1,0 +1,98 @@
+header {
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input[type="number"] {
+    margin: 10px;
+    padding: 10px;
+    width: 300px; /* Control the width here */
+    height: 40px; /* Control the height here */
+    font-size: 16px; /* Control the font size here */
+    border: 2px solid #ccc; /* Add border styling */
+    border-radius: 5px; /* Add border radius for rounded corners */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Add a slight shadow */
+    outline: none; /* Remove default outline */
+}
+
+input[type="number"]:focus {
+    border-color: #007BFF; /* Change border color on focus */
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.25); /* Add focus shadow */
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007BFF; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Add border radius for rounded corners */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Add a slight shadow */
+    transition: background-color 0.3s; /* Add transition for hover effect */
+}
+
+button:hover {
+    background-color: #0056b3; /* Button background color on hover */
+}
+/* Add the background image to the entire page */
+body {
+    background-image: url('ali.jpg'); /* Use the URL of your image */
+    background-size: cover; /* Ensure the image covers the whole page */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Make the image stay fixed when scrolling */
+    margin: 0;
+    font-family: Arial, sans-serif; /* Optional: add a font for better readability */
+}
+
+/* Optional: Style the container to make sure text is legible over the image */
+.container {
+    position: relative;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    max-width: 600px;
+    margin: 50px auto;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* Style for the headings and buttons */
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
