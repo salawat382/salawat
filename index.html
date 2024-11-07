@@ -5,22 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Number Subtraction Tool</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-    <script>
-        var firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        var database = firebase.database();
-    </script>
 </head>
 <body>
     <!-- Header Section -->
@@ -45,55 +29,83 @@
     </div>
 
     <script>
-        // Set initial total number to 1,000,000
-        const initialTotal = 1000000;
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbwxqkV8XiCMMzTFWpeIKBaZTyMEr_xAOf63DW87vBhIp7UGmjtJ5d0lSEX4960jmUhm/exec'; // Replace with your Google Apps Script URL
 
-        // Reference to the remaining number in the database
-        var remainingNumberRef = firebase.database().ref('remainingNumber');
+        const remainingNumberElement = document.getElementById('remainingNumber');
+        const subtractNumberElement = document.getElementById('subtractNumber');
+
+        // Function to fetch the total number from the server
+        function fetchTotal() {
+            fetch(webAppUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched total:', data.total);  // Log the fetched data for debugging
+                    remainingNumberElement.textContent = formatNumberWithCommas(data.total);
+                })
+                .catch(error => console.error('Error fetching total:', error)); // Added error handling
+        }
+
+        // Function to handle subtraction
+function subtractNumber() {
+    const subtractValue = parseInt(subtractNumberElement.value, 10);
+
+    // Check if the input is a valid number and is not negative
+    if (isNaN(subtractValue) || subtractValue <= 0) {
+        alert("Please enter a valid number greater than 0.");
+        return;
+    }
+
+    // Send the subtraction request to the backend (Google Apps Script)
+    fetch(webAppUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subtractValue: subtractValue })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Updated total:', data.total);  // Log the updated total for debugging
+        // Update the displayed remaining number after the response
+        remainingNumberElement.textContent = formatNumberWithCommas(data.total);
+    })
+    .catch(error => console.error('Error subtracting:', error)); // Added error handling
+}
+
+
+        // Function to handle reset
+        function resetNumber() {
+            const userPassword = prompt("Enter the password to reset:");
+            if (userPassword === "mojtaba") {
+                fetch(webAppUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ subtractValue: -1000000 }) // Use a large negative value to reset
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Reset total:', data.total);  // Log the reset total for debugging
+                    remainingNumberElement.textContent = formatNumberWithCommas(1000000);
+                    alert("Remaining number has been reset!");
+                })
+                .catch(error => console.error('Error resetting:', error)); // Added error handling
+            } else {
+                alert("Incorrect password! Reset denied.");
+            }
+        }
 
         // Function to format the number with commas
         function formatNumberWithCommas(number) {
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        // Update the displayed remaining number initially
-        remainingNumberRef.on('value', (snapshot) => {
-            const remainingNumber = snapshot.val() || initialTotal;
-            const formattedRemaining = formatNumberWithCommas(remainingNumber);
-            document.getElementById('remainingNumber').textContent = formattedRemaining;
-        });
+        // Initial fetch to get the total
+        fetchTotal();
 
-        // Function to handle subtraction
-        function subtractNumber() {
-            const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
-
-            // Check if the input is a valid number and is not negative
-            if (isNaN(subtractValue) || subtractValue <= 0) {
-                alert("Please enter a valid number greater than 0.");
-                return;
-            }
-
-            // Subtract the number in the database
-            remainingNumberRef.transaction((remainingNumber) => {
-                if (remainingNumber === null) {
-                    return initialTotal - subtractValue;
-                } else {
-                    return Math.max(remainingNumber - subtractValue, 0);
-                }
-            });
-        }
-
-        // Function to handle reset
-        function resetNumber() {
-            const resetPassword = "yourPassword123"; // Set your own password here
-            const userPassword = prompt("Enter the password to reset:");
-            if (userPassword === resetPassword) {
-                remainingNumberRef.set(initialTotal);
-                alert("Remaining number has been reset!");
-            } else {
-                alert("Incorrect password! Reset denied.");
-            }
-        }
+        // Polling to update the total every 5 seconds
+        setInterval(fetchTotal, 5000);
     </script>
 </body>
 </html>
