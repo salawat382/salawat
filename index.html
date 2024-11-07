@@ -29,101 +29,99 @@
     </div>
 
     <script>
+        // Set initial total number to 1,000,000
         const initialTotal = 1000000;
         const resetPassword = "mojtaba"; // Set your own password here
-        const apiUrl = "https://script.google.com/macros/s/AKfycbxeC_-1WGyOKrPFyE6uVli639U38Vdo7HvUfzauIedCUuOmeZ_CPKRXJdZO6nPxBr6V/exec"; // Replace with your Google Apps Script URL
+        const apiUrl = "https://your-api-endpoint.com";  // Replace with your actual API URL
+
+        // Get the remaining number from localStorage or use the initial total
+        let remainingNumber = parseInt(localStorage.getItem('remainingNumber'), 10);
+        if (isNaN(remainingNumber)) {
+            remainingNumber = initialTotal;
+        }
 
         // Function to format the number with commas
         function formatNumberWithCommas(number) {
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        // Fetch the current remaining number from Google Apps Script
-        function fetchTotal() {
-            fetch(apiUrl)
-                .then(response => response.text())
+        // Fetch the remaining number from the API
+        function fetchRemainingNumber() {
+            fetch(`${apiUrl}/getRemainingNumber`)
+                .then(response => response.json())
                 .then(data => {
-                    let remainingNumber = parseInt(data, 10);
-                    if (isNaN(remainingNumber)) {
-                        remainingNumber = initialTotal;
-                    }
-                    updateRemainingNumber(remainingNumber);
+                    remainingNumber = data.remainingNumber;
+                    document.getElementById('remainingNumber').textContent = formatNumberWithCommas(remainingNumber);
                 })
-                .catch(error => {
-                    console.error("Error fetching total:", error);
-                });
+                .catch(err => console.error("Error fetching data:", err));
         }
 
-        // Subtract number and update in Google Sheets
+        // Function to handle subtraction
         function subtractNumber() {
-    const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
-    
-    // Validate input
-    if (isNaN(subtractValue) || subtractValue <= 0) {
-        alert("Please enter a valid number greater than 0.");
-        return;
-    }
+            const subtractValue = parseInt(document.getElementById('subtractNumber').value, 10);
+            
+            // Check if the input is a valid number and is not negative
+            if (isNaN(subtractValue) || subtractValue <= 0) {
+                alert("Please enter a valid number greater than 0.");
+                return;
+            }
 
-    // Update local value
-    remainingNumber -= subtractValue;
+            // Subtract the number but ensure the remaining number doesn't go below 0
+            remainingNumber -= subtractValue;
 
-    // Prevent going below 0
-    if (remainingNumber < 0) {
-        remainingNumber = 0;
-    }
+            // Prevent going below 0
+            if (remainingNumber < 0) {
+                remainingNumber = 0;
+            }
 
-    // Save to localStorage
-    localStorage.setItem('remainingNumber', remainingNumber);
+            // Save the updated remaining number to localStorage
+            localStorage.setItem('remainingNumber', remainingNumber);
 
-    // If you are calling an external API (like Google Sheets or Firebase), ensure the API is working
-    fetchAPIToSaveData(remainingNumber); // Example API call
-}
+            // Update the displayed remaining number
+            const formattedRemaining = formatNumberWithCommas(remainingNumber);
+            document.getElementById('remainingNumber').textContent = formattedRemaining;
 
-async function fetchAPIToSaveData(remainingNumber) {
-    try {
-        // Example of making an API call to update Google Sheets or Firebase
-        const response = await fetch('YOUR_API_URL', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ remainingNumber: remainingNumber }),
-        });
-
-        const result = await response.json();
-        console.log("Data saved successfully:", result);
-    } catch (error) {
-        console.error("Error saving data:", error);
-    }
-}
-
+            // Send the updated remaining number to the API
+            fetch(`${apiUrl}/updateRemainingNumber`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ remainingNumber: remainingNumber })
+            })
+            .then(response => response.json())
+            .then(data => console.log("Updated successfully:", data))
+            .catch(err => console.error("Error saving data:", err));
+        }
 
         // Function to handle reset
         function resetNumber() {
             const userPassword = prompt("Enter the password to reset:");
             if (userPassword === resetPassword) {
-                fetch(apiUrl + "?remainingNumber=" + initialTotal, { method: "POST" })
-                    .then(response => response.text())
-                    .then(() => {
-                        updateRemainingNumber(initialTotal);
-                        alert("Remaining number has been reset!");
-                    })
-                    .catch(error => {
-                        console.error("Error resetting number:", error);
-                    });
+                remainingNumber = initialTotal;
+                localStorage.removeItem('remainingNumber');
+                const formattedRemaining = formatNumberWithCommas(remainingNumber);
+                document.getElementById('remainingNumber').textContent = formattedRemaining;
+                alert("Remaining number has been reset!");
+
+                // Reset on the server as well
+                fetch(`${apiUrl}/resetRemainingNumber`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ remainingNumber: initialTotal })
+                })
+                .then(response => response.json())
+                .then(data => console.log("Reset successfully:", data))
+                .catch(err => console.error("Error resetting data:", err));
             } else {
                 alert("Incorrect password! Reset denied.");
             }
         }
 
-        // Update the displayed remaining number
-        function updateRemainingNumber(number) {
-            const formattedRemaining = formatNumberWithCommas(number);
-            document.getElementById('remainingNumber').textContent = formattedRemaining;
-        }
+        // Update the displayed remaining number initially
+        const formattedRemaining = formatNumberWithCommas(remainingNumber);
+        document.getElementById('remainingNumber').textContent = formattedRemaining;
 
-        // Fetch total number on page load
-        fetchTotal();
+        // Optionally, fetch the latest data when the page loads
+        fetchRemainingNumber();
     </script>
 </body>
 </html>
